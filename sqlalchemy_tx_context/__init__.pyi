@@ -1,8 +1,8 @@
-from typing import TYPE_CHECKING, overload, Tuple, Any, Optional, Union
+from typing import TYPE_CHECKING, overload, Tuple, Any, Optional, Union, ContextManager, AsyncContextManager
 
 from sqlalchemy import ScalarSelect, SelectBase
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession
 
-from .context import transaction
 from .types import Insert, Select, Update, Delete, Exists, CompoundSelect
 
 if TYPE_CHECKING:
@@ -17,132 +17,145 @@ if TYPE_CHECKING:
         _T8, _T9
     )
 
+class SQLAlchemyTransactionContext:
+    def __init__(self, engine: AsyncEngine): ...
 
-# TODO: Remove
-def configure(_): ...
+    def transaction(self, transaction_factor=None) -> AsyncContextManager[AsyncSession]: ...
 
-@overload
-def select(__ent0: _TypedColumnClauseArgument[_T0]) -> Select[Tuple[_T0]]: ...
+    def get_current_transaction(self) -> ContextManager[AsyncSession]: ...
 
-
-@overload
-def select(
-    __ent0: _TypedColumnClauseArgument[_T0], __ent1: _TypedColumnClauseArgument[_T1]
-) -> Select[Tuple[_T0, _T1]]: ...
+    @overload
+    def select(self, __ent0: _TypedColumnClauseArgument[_T0]) -> Select[Tuple[_T0]]: ...
 
 
-@overload
-def select(
-    __ent0: _TypedColumnClauseArgument[_T0], __ent1: _TypedColumnClauseArgument[_T1], __ent2: _TypedColumnClauseArgument[_T2]
-) -> Select[Tuple[_T0, _T1, _T2]]: ...
+    @overload
+    def select(
+        self,
+        __ent0: _TypedColumnClauseArgument[_T0], __ent1: _TypedColumnClauseArgument[_T1]
+    ) -> Select[Tuple[_T0, _T1]]: ...
 
 
-@overload
-def select(
-    __ent0: _TypedColumnClauseArgument[_T0],
-    __ent1: _TypedColumnClauseArgument[_T1],
-    __ent2: _TypedColumnClauseArgument[_T2],
-    __ent3: _TypedColumnClauseArgument[_T3],
-) -> Select[Tuple[_T0, _T1, _T2, _T3]]: ...
+    @overload
+    def select(
+        self,
+        __ent0: _TypedColumnClauseArgument[_T0], __ent1: _TypedColumnClauseArgument[_T1], __ent2: _TypedColumnClauseArgument[_T2]
+    ) -> Select[Tuple[_T0, _T1, _T2]]: ...
 
 
-@overload
-def select(
-    __ent0: _TypedColumnClauseArgument[_T0],
-    __ent1: _TypedColumnClauseArgument[_T1],
-    __ent2: _TypedColumnClauseArgument[_T2],
-    __ent3: _TypedColumnClauseArgument[_T3],
-    __ent4: _TypedColumnClauseArgument[_T4],
-) -> Select[Tuple[_T0, _T1, _T2, _T3, _T4]]: ...
+    @overload
+    def select(
+        self,
+        __ent0: _TypedColumnClauseArgument[_T0],
+        __ent1: _TypedColumnClauseArgument[_T1],
+        __ent2: _TypedColumnClauseArgument[_T2],
+        __ent3: _TypedColumnClauseArgument[_T3],
+    ) -> Select[Tuple[_T0, _T1, _T2, _T3]]: ...
 
 
-@overload
-def select(
-    __ent0: _TypedColumnClauseArgument[_T0],
-    __ent1: _TypedColumnClauseArgument[_T1],
-    __ent2: _TypedColumnClauseArgument[_T2],
-    __ent3: _TypedColumnClauseArgument[_T3],
-    __ent4: _TypedColumnClauseArgument[_T4],
-    __ent5: _TypedColumnClauseArgument[_T5],
-) -> Select[Tuple[_T0, _T1, _T2, _T3, _T4, _T5]]: ...
+    @overload
+    def select(
+        self,
+        __ent0: _TypedColumnClauseArgument[_T0],
+        __ent1: _TypedColumnClauseArgument[_T1],
+        __ent2: _TypedColumnClauseArgument[_T2],
+        __ent3: _TypedColumnClauseArgument[_T3],
+        __ent4: _TypedColumnClauseArgument[_T4],
+    ) -> Select[Tuple[_T0, _T1, _T2, _T3, _T4]]: ...
 
 
-@overload
-def select(
-    __ent0: _TypedColumnClauseArgument[_T0],
-    __ent1: _TypedColumnClauseArgument[_T1],
-    __ent2: _TypedColumnClauseArgument[_T2],
-    __ent3: _TypedColumnClauseArgument[_T3],
-    __ent4: _TypedColumnClauseArgument[_T4],
-    __ent5: _TypedColumnClauseArgument[_T5],
-    __ent6: _TypedColumnClauseArgument[_T6],
-) -> Select[Tuple[_T0, _T1, _T2, _T3, _T4, _T5, _T6]]: ...
+    @overload
+    def select(
+        self,
+        __ent0: _TypedColumnClauseArgument[_T0],
+        __ent1: _TypedColumnClauseArgument[_T1],
+        __ent2: _TypedColumnClauseArgument[_T2],
+        __ent3: _TypedColumnClauseArgument[_T3],
+        __ent4: _TypedColumnClauseArgument[_T4],
+        __ent5: _TypedColumnClauseArgument[_T5],
+    ) -> Select[Tuple[_T0, _T1, _T2, _T3, _T4, _T5]]: ...
 
 
-@overload
-def select(
-    __ent0: _TypedColumnClauseArgument[_T0],
-    __ent1: _TypedColumnClauseArgument[_T1],
-    __ent2: _TypedColumnClauseArgument[_T2],
-    __ent3: _TypedColumnClauseArgument[_T3],
-    __ent4: _TypedColumnClauseArgument[_T4],
-    __ent5: _TypedColumnClauseArgument[_T5],
-    __ent6: _TypedColumnClauseArgument[_T6],
-    __ent7: _TypedColumnClauseArgument[_T7],
-) -> Select[Tuple[_T0, _T1, _T2, _T3, _T4, _T5, _T6, _T7]]: ...
+    @overload
+    def select(
+        self,
+        __ent0: _TypedColumnClauseArgument[_T0],
+        __ent1: _TypedColumnClauseArgument[_T1],
+        __ent2: _TypedColumnClauseArgument[_T2],
+        __ent3: _TypedColumnClauseArgument[_T3],
+        __ent4: _TypedColumnClauseArgument[_T4],
+        __ent5: _TypedColumnClauseArgument[_T5],
+        __ent6: _TypedColumnClauseArgument[_T6],
+    ) -> Select[Tuple[_T0, _T1, _T2, _T3, _T4, _T5, _T6]]: ...
 
 
-@overload
-def select(
-    __ent0: _TypedColumnClauseArgument[_T0],
-    __ent1: _TypedColumnClauseArgument[_T1],
-    __ent2: _TypedColumnClauseArgument[_T2],
-    __ent3: _TypedColumnClauseArgument[_T3],
-    __ent4: _TypedColumnClauseArgument[_T4],
-    __ent5: _TypedColumnClauseArgument[_T5],
-    __ent6: _TypedColumnClauseArgument[_T6],
-    __ent7: _TypedColumnClauseArgument[_T7],
-    __ent8: _TypedColumnClauseArgument[_T8],
-) -> Select[Tuple[_T0, _T1, _T2, _T3, _T4, _T5, _T6, _T7, _T8]]: ...
+    @overload
+    def select(
+        self,
+        __ent0: _TypedColumnClauseArgument[_T0],
+        __ent1: _TypedColumnClauseArgument[_T1],
+        __ent2: _TypedColumnClauseArgument[_T2],
+        __ent3: _TypedColumnClauseArgument[_T3],
+        __ent4: _TypedColumnClauseArgument[_T4],
+        __ent5: _TypedColumnClauseArgument[_T5],
+        __ent6: _TypedColumnClauseArgument[_T6],
+        __ent7: _TypedColumnClauseArgument[_T7],
+    ) -> Select[Tuple[_T0, _T1, _T2, _T3, _T4, _T5, _T6, _T7]]: ...
 
 
-@overload
-def select(
-    __ent0: _TypedColumnClauseArgument[_T0],
-    __ent1: _TypedColumnClauseArgument[_T1],
-    __ent2: _TypedColumnClauseArgument[_T2],
-    __ent3: _TypedColumnClauseArgument[_T3],
-    __ent4: _TypedColumnClauseArgument[_T4],
-    __ent5: _TypedColumnClauseArgument[_T5],
-    __ent6: _TypedColumnClauseArgument[_T6],
-    __ent7: _TypedColumnClauseArgument[_T7],
-    __ent8: _TypedColumnClauseArgument[_T8],
-    __ent9: _TypedColumnClauseArgument[_T9],
-) -> Select[Tuple[_T0, _T1, _T2, _T3, _T4, _T5, _T6, _T7, _T8, _T9]]: ...
+    @overload
+    def select(
+        self,
+        __ent0: _TypedColumnClauseArgument[_T0],
+        __ent1: _TypedColumnClauseArgument[_T1],
+        __ent2: _TypedColumnClauseArgument[_T2],
+        __ent3: _TypedColumnClauseArgument[_T3],
+        __ent4: _TypedColumnClauseArgument[_T4],
+        __ent5: _TypedColumnClauseArgument[_T5],
+        __ent6: _TypedColumnClauseArgument[_T6],
+        __ent7: _TypedColumnClauseArgument[_T7],
+        __ent8: _TypedColumnClauseArgument[_T8],
+    ) -> Select[Tuple[_T0, _T1, _T2, _T3, _T4, _T5, _T6, _T7, _T8]]: ...
 
 
-# END OVERLOADED FUNCTIONS select
+    @overload
+    def select(
+        self,
+        __ent0: _TypedColumnClauseArgument[_T0],
+        __ent1: _TypedColumnClauseArgument[_T1],
+        __ent2: _TypedColumnClauseArgument[_T2],
+        __ent3: _TypedColumnClauseArgument[_T3],
+        __ent4: _TypedColumnClauseArgument[_T4],
+        __ent5: _TypedColumnClauseArgument[_T5],
+        __ent6: _TypedColumnClauseArgument[_T6],
+        __ent7: _TypedColumnClauseArgument[_T7],
+        __ent8: _TypedColumnClauseArgument[_T8],
+        __ent9: _TypedColumnClauseArgument[_T9],
+    ) -> Select[Tuple[_T0, _T1, _T2, _T3, _T4, _T5, _T6, _T7, _T8, _T9]]: ...
 
 
-@overload
-def select(
-    *entities: _ColumnsClauseArgument[Any], **__kw: Any
-) -> Select[Any]: ...
-
-def select(*entities: _ColumnsClauseArgument[Any], **__kw: Any) -> Select[Any]: ...
+    # END OVERLOADED FUNCTIONS select
 
 
-def insert(table: _DMLTableArgument) -> Insert: ...
+    @overload
+    def select(
+        self,
+        *entities: _ColumnsClauseArgument[Any], **__kw: Any
+    ) -> Select[Any]: ...
+
+    def select(self, *entities: _ColumnsClauseArgument[Any], **__kw: Any) -> Select[Any]: ...
 
 
-def update(table: _DMLTableArgument) -> Update: ...
+    def insert(self, table: _DMLTableArgument) -> Insert: ...
 
-def delete(table: _DMLTableArgument) -> Delete: ...
 
-def union(*selects: _SelectStatementForCompoundArgument) -> CompoundSelect: ...
+    def update(self, table: _DMLTableArgument) -> Update: ...
 
-def union_all(*selects: _SelectStatementForCompoundArgument) -> CompoundSelect: ...
+    def delete(self, table: _DMLTableArgument) -> Delete: ...
 
-def exists(
-    __argument: Optional[Union[_ColumnsClauseArgument[Any], SelectBase, ScalarSelect[Any]]] = None
-) -> Exists: ...
+    def union(self, *selects: _SelectStatementForCompoundArgument) -> CompoundSelect: ...
+
+    def union_all(self, *selects: _SelectStatementForCompoundArgument) -> CompoundSelect: ...
+
+    def exists(
+        self, __argument: Optional[Union[_ColumnsClauseArgument[Any], SelectBase, ScalarSelect[Any]]] = None
+    ) -> Exists: ...
