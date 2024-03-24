@@ -1,8 +1,7 @@
-import typing
-from typing import Optional, Any
+from typing import Optional, Any, Tuple, TypeVar, TYPE_CHECKING, overload, Union
 
 import sqlalchemy
-from sqlalchemy import util, Result, CursorResult
+from sqlalchemy import util, Result, CursorResult, ScalarResult
 # noinspection PyProtectedMember
 from sqlalchemy.engine.interfaces import _CoreAnyExecuteParams
 # noinspection PyProtectedMember
@@ -11,16 +10,18 @@ from sqlalchemy.orm._typing import OrmExecuteOptionsParameter
 from sqlalchemy.orm.session import _BindArguments
 # noinspection PyProtectedMember
 from sqlalchemy.sql._typing import (
-    _TP, _TypedColumnClauseArgument,
+    _TypedColumnClauseArgument,
     _ColumnsClauseArgument,
     _T0, _T1, _T2, _T3,
     _T4, _T5, _T6, _T7
 )
 from sqlalchemy.sql.dml import ReturningInsert as SqlalchemyReturningInsert
-from sqlalchemy.sql.selectable import TypedReturnsRows
 
 
-class ReturningInsert(SqlalchemyReturningInsert, TypedReturnsRows[_TP]):
+_T = TypeVar("_T")
+
+
+class ReturningInsert(SqlalchemyReturningInsert[_T]):
     async def execute(
             self,
             params: Optional[_CoreAnyExecuteParams] = None,
@@ -29,7 +30,25 @@ class ReturningInsert(SqlalchemyReturningInsert, TypedReturnsRows[_TP]):
             bind_arguments: Optional[_BindArguments] = None,
             _parent_execute_state: Optional[Any] = None,
             _add_event: Optional[Any] = None
-    ) -> Result[_TP]: ...
+    ) -> Result[Tuple[_T]]: ...
+
+    async def scalar(
+        self,
+        params: Optional[_CoreAnyExecuteParams] = None,
+        *,
+        execution_options: OrmExecuteOptionsParameter = util.EMPTY_DICT,
+        bind_arguments: Optional[_BindArguments] = None,
+        **kw: Any,
+    ) -> Optional[_T]: ...
+
+    async def scalars(
+        self,
+        params: Optional[_CoreAnyExecuteParams] = None,
+        *,
+        execution_options: OrmExecuteOptionsParameter = util.EMPTY_DICT,
+        bind_arguments: Optional[_BindArguments] = None,
+        **kw: Any,
+    ) -> ScalarResult[_T]: ...
 
 
 # noinspection PyProtectedMember,PyMethodOverriding
@@ -44,30 +63,30 @@ class Insert(sqlalchemy.Insert):
         _add_event: Optional[Any] = None,
     ) -> CursorResult[Any]: ...
 
-    if typing.TYPE_CHECKING:
+    if TYPE_CHECKING:
         # START OVERLOADED FUNCTIONS self.returning ReturningInsert 1-8 ", *, sort_by_parameter_order: bool = False"  # noqa: E501
 
         # code within this block is **programmatically,
         # statically generated** by tools/generate_tuple_map_overloads.py
 
-        @typing.overload
+        @overload
         def returning(
             self,
             __ent0: _TypedColumnClauseArgument[_T0],
             *,
             sort_by_parameter_order: bool = False
-        ) -> ReturningInsert[typing.Tuple[_T0]]: ...
+        ) -> ReturningInsert[_T0]: ...
 
-        @typing.overload
+        @overload
         def returning(
             self,
             __ent0: _TypedColumnClauseArgument[_T0],
             __ent1: _TypedColumnClauseArgument[_T1],
             *,
             sort_by_parameter_order: bool = False,
-        ) -> ReturningInsert[typing.Tuple[_T0, _T1]]: ...
+        ) -> ReturningInsert[Union[_T0, _T1]]: ...
 
-        @typing.overload
+        @overload
         def returning(
             self,
             __ent0: _TypedColumnClauseArgument[_T0],
@@ -75,9 +94,9 @@ class Insert(sqlalchemy.Insert):
             __ent2: _TypedColumnClauseArgument[_T2],
             *,
             sort_by_parameter_order: bool = False,
-        ) -> ReturningInsert[typing.Tuple[_T0, _T1, _T2]]: ...
+        ) -> ReturningInsert[Union[_T0, _T1, _T2]]: ...
 
-        @typing.overload
+        @overload
         def returning(
             self,
             __ent0: _TypedColumnClauseArgument[_T0],
@@ -86,9 +105,9 @@ class Insert(sqlalchemy.Insert):
             __ent3: _TypedColumnClauseArgument[_T3],
             *,
             sort_by_parameter_order: bool = False,
-        ) -> ReturningInsert[typing.Tuple[_T0, _T1, _T2, _T3]]: ...
+        ) -> ReturningInsert[Union[_T0, _T1, _T2, _T3]]: ...
 
-        @typing.overload
+        @overload
         def returning(
             self,
             __ent0: _TypedColumnClauseArgument[_T0],
@@ -98,9 +117,9 @@ class Insert(sqlalchemy.Insert):
             __ent4: _TypedColumnClauseArgument[_T4],
             *,
             sort_by_parameter_order: bool = False,
-        ) -> ReturningInsert[typing.Tuple[_T0, _T1, _T2, _T3, _T4]]: ...
+        ) -> ReturningInsert[Union[_T0, _T1, _T2, _T3, _T4]]: ...
 
-        @typing.overload
+        @overload
         def returning(
             self,
             __ent0: _TypedColumnClauseArgument[_T0],
@@ -111,9 +130,9 @@ class Insert(sqlalchemy.Insert):
             __ent5: _TypedColumnClauseArgument[_T5],
             *,
             sort_by_parameter_order: bool = False,
-        ) -> ReturningInsert[typing.Tuple[_T0, _T1, _T2, _T3, _T4, _T5]]: ...
+        ) -> ReturningInsert[Union[_T0, _T1, _T2, _T3, _T4, _T5]]: ...
 
-        @typing.overload
+        @overload
         def returning(
             self,
             __ent0: _TypedColumnClauseArgument[_T0],
@@ -125,9 +144,9 @@ class Insert(sqlalchemy.Insert):
             __ent6: _TypedColumnClauseArgument[_T6],
             *,
             sort_by_parameter_order: bool = False,
-        ) -> ReturningInsert[typing.Tuple[_T0, _T1, _T2, _T3, _T4, _T5, _T6]]: ...
+        ) -> ReturningInsert[Union[_T0, _T1, _T2, _T3, _T4, _T5, _T6]]: ...
 
-        @typing.overload
+        @overload
         def returning(
             self,
             __ent0: _TypedColumnClauseArgument[_T0],
@@ -141,22 +160,22 @@ class Insert(sqlalchemy.Insert):
             *,
             sort_by_parameter_order: bool = False,
         ) -> ReturningInsert[
-            typing.Tuple[_T0, _T1, _T2, _T3, _T4, _T5, _T6, _T7]
+            Union[_T0, _T1, _T2, _T3, _T4, _T5, _T6, _T7]
         ]: ...
 
         # END OVERLOADED FUNCTIONS self.returning
 
-        @typing.overload
+        @overload
         def returning(
             self,
-            *cols: _ColumnsClauseArgument[typing.Any],
+            *cols: _ColumnsClauseArgument[Any],
             sort_by_parameter_order: bool = False,
-            **__kw: typing.Any,
-        ) -> ReturningInsert[typing.Any]: ...
+            **__kw: Any,
+        ) -> ReturningInsert[Any]: ...
 
         def returning(
             self,
-            *cols: _ColumnsClauseArgument[typing.Any],
+            *cols: _ColumnsClauseArgument[Any],
             sort_by_parameter_order: bool = False,
-            **__kw: typing.Any,
-        ) -> ReturningInsert[typing.Any]: ...
+            **__kw: Any,
+        ) -> ReturningInsert[Any]: ...

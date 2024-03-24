@@ -1,7 +1,7 @@
-from typing import Optional, Any, TYPE_CHECKING, overload, Tuple
+from typing import Optional, Any, TYPE_CHECKING, overload, Tuple, TypeVar, Union
 
 import sqlalchemy
-from sqlalchemy import util, Result, CursorResult
+from sqlalchemy import util, Result, CursorResult, ScalarResult
 # noinspection PyProtectedMember
 from sqlalchemy.engine.interfaces import _CoreAnyExecuteParams
 # noinspection PyProtectedMember
@@ -10,7 +10,7 @@ from sqlalchemy.orm._typing import OrmExecuteOptionsParameter
 from sqlalchemy.orm.session import _BindArguments
 # noinspection PyProtectedMember
 from sqlalchemy.sql._typing import (
-    _TP, _TypedColumnClauseArgument,
+    _TypedColumnClauseArgument,
     _ColumnsClauseArgument,
     _T0, _T1, _T2, _T3,
     _T4, _T5, _T6, _T7
@@ -19,7 +19,10 @@ from sqlalchemy.sql.dml import ReturningDelete as SqlalchemyReturningDelete
 from sqlalchemy.sql.selectable import TypedReturnsRows
 
 
-class ReturningDelete(SqlalchemyReturningDelete, TypedReturnsRows[_TP]):
+_T = TypeVar("_T")
+
+
+class ReturningDelete(SqlalchemyReturningDelete, TypedReturnsRows[Tuple[_T]]):
     async def execute(
             self,
             params: Optional[_CoreAnyExecuteParams] = None,
@@ -28,7 +31,25 @@ class ReturningDelete(SqlalchemyReturningDelete, TypedReturnsRows[_TP]):
             bind_arguments: Optional[_BindArguments] = None,
             _parent_execute_state: Optional[Any] = None,
             _add_event: Optional[Any] = None
-    ) -> Result[_TP]: ...
+    ) -> Result[Tuple[_T]]: ...
+
+    async def scalar(
+        self,
+        params: Optional[_CoreAnyExecuteParams] = None,
+        *,
+        execution_options: OrmExecuteOptionsParameter = util.EMPTY_DICT,
+        bind_arguments: Optional[_BindArguments] = None,
+        **kw: Any,
+    ) -> Optional[_T]: ...
+
+    async def scalars(
+        self,
+        params: Optional[_CoreAnyExecuteParams] = None,
+        *,
+        execution_options: OrmExecuteOptionsParameter = util.EMPTY_DICT,
+        bind_arguments: Optional[_BindArguments] = None,
+        **kw: Any,
+    ) -> ScalarResult[_T]: ...
 
 
 class Delete(sqlalchemy.Delete):
@@ -46,12 +67,12 @@ class Delete(sqlalchemy.Delete):
         @overload
         def returning(
             self, __ent0: _TypedColumnClauseArgument[_T0]
-        ) -> ReturningDelete[Tuple[_T0]]: ...
+        ) -> ReturningDelete[_T0]: ...
 
         @overload
         def returning(
             self, __ent0: _TypedColumnClauseArgument[_T0], __ent1: _TypedColumnClauseArgument[_T1]
-        ) -> ReturningDelete[Tuple[_T0, _T1]]: ...
+        ) -> ReturningDelete[Union[_T0, _T1]]: ...
 
         @overload
         def returning(
@@ -59,7 +80,7 @@ class Delete(sqlalchemy.Delete):
             __ent0: _TypedColumnClauseArgument[_T0],
             __ent1: _TypedColumnClauseArgument[_T1],
             __ent2: _TypedColumnClauseArgument[_T2]
-        ) -> ReturningDelete[Tuple[_T0, _T1, _T2]]: ...
+        ) -> ReturningDelete[Union[_T0, _T1, _T2]]: ...
 
         @overload
         def returning(
@@ -68,7 +89,7 @@ class Delete(sqlalchemy.Delete):
             __ent1: _TypedColumnClauseArgument[_T1],
             __ent2: _TypedColumnClauseArgument[_T2],
             __ent3: _TypedColumnClauseArgument[_T3],
-        ) -> ReturningDelete[Tuple[_T0, _T1, _T2, _T3]]: ...
+        ) -> ReturningDelete[Union[_T0, _T1, _T2, _T3]]: ...
 
         @overload
         def returning(
@@ -78,7 +99,7 @@ class Delete(sqlalchemy.Delete):
             __ent2: _TypedColumnClauseArgument[_T2],
             __ent3: _TypedColumnClauseArgument[_T3],
             __ent4: _TypedColumnClauseArgument[_T4],
-        ) -> ReturningDelete[Tuple[_T0, _T1, _T2, _T3, _T4]]: ...
+        ) -> ReturningDelete[Union[_T0, _T1, _T2, _T3, _T4]]: ...
 
         @overload
         def returning(
@@ -89,7 +110,7 @@ class Delete(sqlalchemy.Delete):
             __ent3: _TypedColumnClauseArgument[_T3],
             __ent4: _TypedColumnClauseArgument[_T4],
             __ent5: _TypedColumnClauseArgument[_T5],
-        ) -> ReturningDelete[Tuple[_T0, _T1, _T2, _T3, _T4, _T5]]: ...
+        ) -> ReturningDelete[Union[_T0, _T1, _T2, _T3, _T4, _T5]]: ...
 
         @overload
         def returning(
@@ -101,7 +122,7 @@ class Delete(sqlalchemy.Delete):
             __ent4: _TypedColumnClauseArgument[_T4],
             __ent5: _TypedColumnClauseArgument[_T5],
             __ent6: _TypedColumnClauseArgument[_T6],
-        ) -> ReturningDelete[Tuple[_T0, _T1, _T2, _T3, _T4, _T5, _T6]]: ...
+        ) -> ReturningDelete[Union[_T0, _T1, _T2, _T3, _T4, _T5, _T6]]: ...
 
         @overload
         def returning(
@@ -115,7 +136,7 @@ class Delete(sqlalchemy.Delete):
             __ent6: _TypedColumnClauseArgument[_T6],
             __ent7: _TypedColumnClauseArgument[_T7],
         ) -> ReturningDelete[
-            Tuple[_T0, _T1, _T2, _T3, _T4, _T5, _T6, _T7]
+            Union[_T0, _T1, _T2, _T3, _T4, _T5, _T6, _T7]
         ]: ...
 
         @overload

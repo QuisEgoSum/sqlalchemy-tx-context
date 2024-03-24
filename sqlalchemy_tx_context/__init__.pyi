@@ -25,21 +25,24 @@ class SQLAlchemyTransactionContext:
     def get_current_transaction(self) -> ContextManager[AsyncSession]: ...
 
     @overload
-    def select(self, __ent0: _TypedColumnClauseArgument[_T0]) -> Select[Tuple[_T0]]: ...
+    def select(self, __ent0: _TypedColumnClauseArgument[_T0]) -> Select[_T0]: ...
 
 
     @overload
     def select(
         self,
-        __ent0: _TypedColumnClauseArgument[_T0], __ent1: _TypedColumnClauseArgument[_T1]
-    ) -> Select[Tuple[_T0, _T1]]: ...
+        __ent0: _TypedColumnClauseArgument[_T0],
+        __ent1: _TypedColumnClauseArgument[_T1]
+    ) -> Select[Union[_T0, _T1]]: ...
 
 
     @overload
     def select(
         self,
-        __ent0: _TypedColumnClauseArgument[_T0], __ent1: _TypedColumnClauseArgument[_T1], __ent2: _TypedColumnClauseArgument[_T2]
-    ) -> Select[Tuple[_T0, _T1, _T2]]: ...
+        __ent0: _TypedColumnClauseArgument[_T0],
+        __ent1: _TypedColumnClauseArgument[_T1],
+        __ent2: _TypedColumnClauseArgument[_T2]
+    ) -> Select[Union[_T0, _T1, _T2]]: ...
 
 
     @overload
@@ -49,7 +52,7 @@ class SQLAlchemyTransactionContext:
         __ent1: _TypedColumnClauseArgument[_T1],
         __ent2: _TypedColumnClauseArgument[_T2],
         __ent3: _TypedColumnClauseArgument[_T3],
-    ) -> Select[Tuple[_T0, _T1, _T2, _T3]]: ...
+    ) -> Select[Union[_T0, _T1, _T2, _T3]]: ...
 
 
     @overload
@@ -60,7 +63,7 @@ class SQLAlchemyTransactionContext:
         __ent2: _TypedColumnClauseArgument[_T2],
         __ent3: _TypedColumnClauseArgument[_T3],
         __ent4: _TypedColumnClauseArgument[_T4],
-    ) -> Select[Tuple[_T0, _T1, _T2, _T3, _T4]]: ...
+    ) -> Select[Union[_T0, _T1, _T2, _T3, _T4]]: ...
 
 
     @overload
@@ -72,7 +75,7 @@ class SQLAlchemyTransactionContext:
         __ent3: _TypedColumnClauseArgument[_T3],
         __ent4: _TypedColumnClauseArgument[_T4],
         __ent5: _TypedColumnClauseArgument[_T5],
-    ) -> Select[Tuple[_T0, _T1, _T2, _T3, _T4, _T5]]: ...
+    ) -> Select[Union[_T0, _T1, _T2, _T3, _T4, _T5]]: ...
 
 
     @overload
@@ -85,7 +88,7 @@ class SQLAlchemyTransactionContext:
         __ent4: _TypedColumnClauseArgument[_T4],
         __ent5: _TypedColumnClauseArgument[_T5],
         __ent6: _TypedColumnClauseArgument[_T6],
-    ) -> Select[Tuple[_T0, _T1, _T2, _T3, _T4, _T5, _T6]]: ...
+    ) -> Select[Union[_T0, _T1, _T2, _T3, _T4, _T5, _T6]]: ...
 
 
     @overload
@@ -99,7 +102,7 @@ class SQLAlchemyTransactionContext:
         __ent5: _TypedColumnClauseArgument[_T5],
         __ent6: _TypedColumnClauseArgument[_T6],
         __ent7: _TypedColumnClauseArgument[_T7],
-    ) -> Select[Tuple[_T0, _T1, _T2, _T3, _T4, _T5, _T6, _T7]]: ...
+    ) -> Select[Union[_T0, _T1, _T2, _T3, _T4, _T5, _T6, _T7]]: ...
 
 
     @overload
@@ -114,7 +117,7 @@ class SQLAlchemyTransactionContext:
         __ent6: _TypedColumnClauseArgument[_T6],
         __ent7: _TypedColumnClauseArgument[_T7],
         __ent8: _TypedColumnClauseArgument[_T8],
-    ) -> Select[Tuple[_T0, _T1, _T2, _T3, _T4, _T5, _T6, _T7, _T8]]: ...
+    ) -> Select[Union[_T0, _T1, _T2, _T3, _T4, _T5, _T6, _T7, _T8]]: ...
 
 
     @overload
@@ -130,7 +133,7 @@ class SQLAlchemyTransactionContext:
         __ent7: _TypedColumnClauseArgument[_T7],
         __ent8: _TypedColumnClauseArgument[_T8],
         __ent9: _TypedColumnClauseArgument[_T9],
-    ) -> Select[Tuple[_T0, _T1, _T2, _T3, _T4, _T5, _T6, _T7, _T8, _T9]]: ...
+    ) -> Select[Union[_T0, _T1, _T2, _T3, _T4, _T5, _T6, _T7, _T8, _T9]]: ...
 
 
     # END OVERLOADED FUNCTIONS select

@@ -7,41 +7,45 @@ from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
+FIELD_PROPERTIES = frozenset([
+    'query',
+    'context'
+])
+
+EXECUTE_PROPERTIES = frozenset([
+    'execute',
+    'scalar',
+    'scalars'
+])
+
+
+def _execute_query(context: "SQLAlchemyTransactionContext", query, method: str):
+    async def executor(*args, **kwargs):
+        # noinspection PyArgumentList
+        async with context.get_current_transaction() as tx:
+            return await getattr(tx, method)(query, *args, **kwargs)
+    return executor
+
+
 class ProxyQuery:
-    def __init__(self, query):
+    def __init__(self, query, context: "SQLAlchemyTransactionContext"):
         self.query = query
-        self.execute = None
+        self.context = context
 
     def __getattribute__(self, item):
-        if item == 'query':
+        if item in FIELD_PROPERTIES:
             return object.__getattribute__(self, item)
+        elif item in EXECUTE_PROPERTIES:
+            return _execute_query(self.context, self.query, item)
         value = object.__getattribute__(self.query, item)
-        if item == 'execute':
-            return value
         if not callable(value):
             return value
 
         def wrapper(*args, **kwargs):
             query = value(*args, **kwargs)
-            if not hasattr(query, 'execute'):
-                setattr(query, 'execute', self.execute)
             self.query = query
             return self
         return wrapper
-
-
-class Execute:
-    def __init__(self, _context: "SQLAlchemyTransactionContext", proxy_result: typing.Any):
-        self.context = _context
-        self.proxy_query = proxy_result
-
-    async def _execute_query(self):
-        # noinspection PyArgumentList
-        async with self.context.get_current_transaction() as tx:
-            return await tx.execute(self.proxy_query.query)
-
-    async def __call__(self):
-        return await self._execute_query()
 
 
 class SQLAlchemyTransactionContext:
@@ -99,11 +103,6 @@ class SQLAlchemyTransactionContext:
 
     def _proxy_sqlalchemy_query_factory(self, method: typing.Any) -> typing.Any:
         def wrapper(*args, **kwargs):
-            result = method(*args, **kwargs)
-            proxy_query = ProxyQuery(result)
-            execute = Execute(self, proxy_query)
-            proxy_query.execute = execute
-            setattr(result, 'execute', execute)
-            return proxy_query
-
+            query = method(*args, **kwargs)
+            return ProxyQuery(query, self)
         return wrapper
