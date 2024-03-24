@@ -1,19 +1,18 @@
-from typing import Optional, Any
+from typing import Any, Optional, Generic, TypeVar, Tuple
 
-from sqlalchemy import util, Result, CursorResult
+from sqlalchemy import util, Result
 # noinspection PyProtectedMember
 from sqlalchemy.engine.interfaces import _CoreAnyExecuteParams
 # noinspection PyProtectedMember
 from sqlalchemy.orm._typing import OrmExecuteOptionsParameter
 # noinspection PyProtectedMember
 from sqlalchemy.orm.session import _BindArguments
-from sqlalchemy.sql.selectable import Exists as SqlalchemyExists
-from typing_extensions import Union
-
-from .Select import Select
 
 
-class Exists(SqlalchemyExists):
+T = TypeVar('T')
+
+
+class ExecuteMixin(Generic[T]):
     async def execute(
         self,
         params: Optional[_CoreAnyExecuteParams] = None,
@@ -22,6 +21,4 @@ class Exists(SqlalchemyExists):
         bind_arguments: Optional[_BindArguments] = None,
         _parent_execute_state: Optional[Any] = None,
         _add_event: Optional[Any] = None
-    ) -> Union[Result, CursorResult]: ...
-
-    def select(self) -> Select[bool]: ...
+    ) -> Result[Tuple[T]]: ...

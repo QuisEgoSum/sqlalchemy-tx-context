@@ -15,15 +15,53 @@ FIELD_PROPERTIES = frozenset([
 EXECUTE_PROPERTIES = frozenset([
     'execute',
     'scalar',
-    'scalars'
+    'scalars',
+    'first',
+    'mapped_first',
+    'mapped_one',
+    'mapped_all',
+    'rowcount'
 ])
+
+RESULT_PROPERTIES = frozenset([
+    'rowcount',
+    'first'
+])
+
+RESULT_MAPPINGS_PROPERTIES = frozenset([
+    'mapped_first',
+    'mapped_one',
+    'mapped_all',
+])
+
+RESULT_MAPPINGS_METHODS = {
+    'mapped_first': 'fetchone',
+    'mapped_one': 'fetchone',
+    'mapped_all': 'fetchall'
+}
 
 
 def _execute_query(context: "SQLAlchemyTransactionContext", query, method: str):
-    async def executor(*args, **kwargs):
-        # noinspection PyArgumentList
-        async with context.get_current_transaction() as tx:
-            return await getattr(tx, method)(query, *args, **kwargs)
+    if method in RESULT_PROPERTIES:
+        async def executor(*args, **kwargs):
+            # noinspection PyArgumentList
+            async with context.get_current_transaction() as tx:
+                result = await tx.execute(query, *args, **kwargs)
+                value = getattr(result, method)
+                if callable(value):
+                    return value()
+                return value
+    elif method in RESULT_MAPPINGS_PROPERTIES:
+        async def executor(*args, **kwargs):
+            # noinspection PyArgumentList
+            async with context.get_current_transaction() as tx:
+                result = await tx.execute(query, *args, **kwargs)
+                return getattr(result.mappings(), RESULT_MAPPINGS_METHODS[method])()
+    else:
+        async def executor(*args, **kwargs):
+            # noinspection PyArgumentList
+            async with context.get_current_transaction() as tx:
+                return await getattr(tx, method)(query, *args, **kwargs)
     return executor
 
 
@@ -42,8 +80,7 @@ class ProxyQuery:
             return value
 
         def wrapper(*args, **kwargs):
-            query = value(*args, **kwargs)
-            self.query = query
+            self.query = value(*args, **kwargs)
             return self
         return wrapper
 

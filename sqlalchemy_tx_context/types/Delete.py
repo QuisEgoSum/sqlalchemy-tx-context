@@ -1,7 +1,7 @@
 from typing import Optional, Any, TYPE_CHECKING, overload, Tuple, TypeVar, Union
 
 import sqlalchemy
-from sqlalchemy import util, Result, CursorResult, ScalarResult
+from sqlalchemy import util, CursorResult
 # noinspection PyProtectedMember
 from sqlalchemy.engine.interfaces import _CoreAnyExecuteParams
 # noinspection PyProtectedMember
@@ -18,41 +18,17 @@ from sqlalchemy.sql._typing import (
 from sqlalchemy.sql.dml import ReturningDelete as SqlalchemyReturningDelete
 from sqlalchemy.sql.selectable import TypedReturnsRows
 
+from .Rowcount import Rowcount
+from .WithDataMixin import WithDataMixin
 
 _T = TypeVar("_T")
 
 
-class ReturningDelete(SqlalchemyReturningDelete, TypedReturnsRows[Tuple[_T]]):
-    async def execute(
-            self,
-            params: Optional[_CoreAnyExecuteParams] = None,
-            *,
-            execution_options: OrmExecuteOptionsParameter = util.EMPTY_DICT,
-            bind_arguments: Optional[_BindArguments] = None,
-            _parent_execute_state: Optional[Any] = None,
-            _add_event: Optional[Any] = None
-    ) -> Result[Tuple[_T]]: ...
-
-    async def scalar(
-        self,
-        params: Optional[_CoreAnyExecuteParams] = None,
-        *,
-        execution_options: OrmExecuteOptionsParameter = util.EMPTY_DICT,
-        bind_arguments: Optional[_BindArguments] = None,
-        **kw: Any,
-    ) -> Optional[_T]: ...
-
-    async def scalars(
-        self,
-        params: Optional[_CoreAnyExecuteParams] = None,
-        *,
-        execution_options: OrmExecuteOptionsParameter = util.EMPTY_DICT,
-        bind_arguments: Optional[_BindArguments] = None,
-        **kw: Any,
-    ) -> ScalarResult[_T]: ...
+class ReturningDelete(SqlalchemyReturningDelete, TypedReturnsRows[Tuple[_T]], WithDataMixin[_T], Rowcount):
+    pass
 
 
-class Delete(sqlalchemy.Delete):
+class Delete(sqlalchemy.Delete, Rowcount):
     async def execute(
         self,
         params: Optional[_CoreAnyExecuteParams] = None,

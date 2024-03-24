@@ -1,7 +1,7 @@
-from typing import Optional, Any, Tuple, TypeVar, TYPE_CHECKING, overload, Union
+from typing import Optional, Any, TypeVar, TYPE_CHECKING, overload, Union
 
 import sqlalchemy
-from sqlalchemy import util, Result, CursorResult, ScalarResult
+from sqlalchemy import util, CursorResult
 # noinspection PyProtectedMember
 from sqlalchemy.engine.interfaces import _CoreAnyExecuteParams
 # noinspection PyProtectedMember
@@ -17,42 +17,18 @@ from sqlalchemy.sql._typing import (
 )
 from sqlalchemy.sql.dml import ReturningInsert as SqlalchemyReturningInsert
 
+from .Rowcount import Rowcount
+from .WithDataMixin import WithDataMixin
 
-_T = TypeVar("_T")
+T = TypeVar("T")
 
 
-class ReturningInsert(SqlalchemyReturningInsert[_T]):
-    async def execute(
-            self,
-            params: Optional[_CoreAnyExecuteParams] = None,
-            *,
-            execution_options: OrmExecuteOptionsParameter = util.EMPTY_DICT,
-            bind_arguments: Optional[_BindArguments] = None,
-            _parent_execute_state: Optional[Any] = None,
-            _add_event: Optional[Any] = None
-    ) -> Result[Tuple[_T]]: ...
-
-    async def scalar(
-        self,
-        params: Optional[_CoreAnyExecuteParams] = None,
-        *,
-        execution_options: OrmExecuteOptionsParameter = util.EMPTY_DICT,
-        bind_arguments: Optional[_BindArguments] = None,
-        **kw: Any,
-    ) -> Optional[_T]: ...
-
-    async def scalars(
-        self,
-        params: Optional[_CoreAnyExecuteParams] = None,
-        *,
-        execution_options: OrmExecuteOptionsParameter = util.EMPTY_DICT,
-        bind_arguments: Optional[_BindArguments] = None,
-        **kw: Any,
-    ) -> ScalarResult[_T]: ...
+class ReturningInsert(SqlalchemyReturningInsert[T], WithDataMixin[T], Rowcount):
+    pass
 
 
 # noinspection PyProtectedMember,PyMethodOverriding
-class Insert(sqlalchemy.Insert):
+class Insert(sqlalchemy.Insert, Rowcount):
     async def execute(
         self,
         params: Optional[_CoreAnyExecuteParams] = None,

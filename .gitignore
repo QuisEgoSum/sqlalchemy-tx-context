@@ -1,4 +1,4 @@
-/example
 .idea
 .venv
 __pycache__
+/tmp
