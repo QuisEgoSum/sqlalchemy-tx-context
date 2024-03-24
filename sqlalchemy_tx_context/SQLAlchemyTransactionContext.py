@@ -140,6 +140,5 @@ class SQLAlchemyTransactionContext:
 
     def _proxy_sqlalchemy_query_factory(self, method: typing.Any) -> typing.Any:
         def wrapper(*args, **kwargs):
-            query = method(*args, **kwargs)
-            return ProxyQuery(query, self)
+            return ProxyQuery(method(*args, **kwargs), self)
         return wrapper
