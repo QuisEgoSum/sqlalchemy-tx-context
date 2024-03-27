@@ -8,7 +8,7 @@ def readme():
 
 setup(
     name='sqlalchemy_tx_context',
-    version='0.1.0',
+    version='0.2.0',
     author='QuisEgoSum',
     author_email='subbotin.evdokim@gmail.com',
     description='An extension for sqlalchemy',
@@ -17,12 +17,12 @@ setup(
     url='https://github.com/QuisEgoSum/sqlalchemy-tx-context',
     packages=find_packages(exclude=['tmp', 'example']),
     install_requires=[
-        'requests>=2.0.0',
+        'SQLAlchemy>=2.0.0',
         'asyncpg>=0.29.0',
         'contextvars>=2.4'
     ],
     keywords='sqlalchemy',
-    python_requires='>=3.0',
+    python_requires='>=3.7',
     license='MIT',
     include_package_data=True,
     package_data={

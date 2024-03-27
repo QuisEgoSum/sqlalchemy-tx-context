@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING, overload, Any, Optional, Union, ContextManager, AsyncContextManager
 
 from sqlalchemy import ScalarSelect, SelectBase
-from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, AsyncSessionTransaction
 
 from .types import Insert, Select, Update, Delete, Exists, CompoundSelect
 
@@ -18,11 +18,18 @@ if TYPE_CHECKING:
     )
 
 class SQLAlchemyTransactionContext:
+    engine: AsyncEngine
+
     def __init__(self, engine: AsyncEngine): ...
 
-    def transaction(self, transaction_factor=None) -> AsyncContextManager[AsyncSession]: ...
+    def transaction(
+        self,
+        session_maker=None
+    ) -> AsyncContextManager[Union[AsyncSession, AsyncSessionTransaction]]: ...
 
-    def get_current_transaction(self) -> ContextManager[AsyncSession]: ...
+    def current_transaction_or_default(self) -> AsyncContextManager[AsyncSession]: ...
+
+    def get_current_transaction(self) -> Optional[AsyncSession]: ...
 
     @overload
     def select(self, __ent0: _TypedColumnClauseArgument[_T0]) -> Select[_T0]: ...

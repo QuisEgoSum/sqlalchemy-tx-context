@@ -3,7 +3,7 @@ import contextvars
 from contextlib import asynccontextmanager
 
 import sqlalchemy
-from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker
+from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker, AsyncSessionTransaction
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
@@ -17,6 +17,7 @@ EXECUTE_PROPERTIES = frozenset([
     'scalar',
     'scalars',
     'first',
+    'all',
     'mapped_first',
     'mapped_one',
     'mapped_all',
@@ -25,7 +26,8 @@ EXECUTE_PROPERTIES = frozenset([
 
 RESULT_PROPERTIES = frozenset([
     'rowcount',
-    'first'
+    'first',
+    'all'
 ])
 
 RESULT_MAPPINGS_PROPERTIES = frozenset([
@@ -35,7 +37,7 @@ RESULT_MAPPINGS_PROPERTIES = frozenset([
 ])
 
 RESULT_MAPPINGS_METHODS = {
-    'mapped_first': 'fetchone',
+    'mapped_first': 'first',
     'mapped_one': 'fetchone',
     'mapped_all': 'fetchall'
 }
@@ -45,7 +47,7 @@ def _execute_query(context: "SQLAlchemyTransactionContext", query, method: str):
     if method in RESULT_PROPERTIES:
         async def executor(*args, **kwargs):
             # noinspection PyArgumentList
-            async with context.get_current_transaction() as tx:
+            async with context.current_transaction_or_default() as tx:
                 result = await tx.execute(query, *args, **kwargs)
                 value = getattr(result, method)
                 if callable(value):
@@ -54,13 +56,13 @@ def _execute_query(context: "SQLAlchemyTransactionContext", query, method: str):
     elif method in RESULT_MAPPINGS_PROPERTIES:
         async def executor(*args, **kwargs):
             # noinspection PyArgumentList
-            async with context.get_current_transaction() as tx:
+            async with context.current_transaction_or_default() as tx:
                 result = await tx.execute(query, *args, **kwargs)
                 return getattr(result.mappings(), RESULT_MAPPINGS_METHODS[method])()
     else:
         async def executor(*args, **kwargs):
             # noinspection PyArgumentList
-            async with context.get_current_transaction() as tx:
+            async with context.current_transaction_or_default() as tx:
                 return await getattr(tx, method)(query, *args, **kwargs)
     return executor
 
@@ -94,11 +96,13 @@ class SQLAlchemyTransactionContext:
             [], typing.AsyncContextManager[AsyncSession]
         ] = None
     ):
-        self._engine = engine
+        self.engine = engine
         if default_session_maker is None:
-            self._session_maker = async_sessionmaker(self._engine, class_=AsyncSession, expire_on_commit=False).begin
+            self.default_session_maker = async_sessionmaker(
+                self.engine, class_=AsyncSession, expire_on_commit=False
+            ).begin
         else:
-            self._session_maker = default_session_maker
+            self.default_session_maker = default_session_maker
         self._transaction_var = contextvars.ContextVar('transactions')
 
         self.select = self._proxy_sqlalchemy_query_factory(sqlalchemy.select)
@@ -110,33 +114,35 @@ class SQLAlchemyTransactionContext:
         self.exists = self._proxy_sqlalchemy_query_factory(sqlalchemy.exists)
 
     @asynccontextmanager
-    async def transaction(self, _session_maker=None) -> typing.AsyncContextManager[AsyncSession]:
-        if _session_maker is None:
-            _session_maker = self._session_maker
-        async with _session_maker() as tx:
-            tx_list: typing.Optional[list] = self._transaction_var.get(None)
-            if tx_list:
-                tx_list.append(tx)
-                token = None
-            else:
-                tx_list = [tx]
-                token = self._transaction_var.set(tx_list)
-            try:
-                yield tx
-            finally:
-                if token is not None:
+    async def transaction(
+        self,
+        session_maker=None
+    ) -> typing.AsyncContextManager[typing.Union[AsyncSession, AsyncSessionTransaction]]:
+        tx: typing.Optional[AsyncSession] = self._transaction_var.get(None)
+        if tx is None:
+            if session_maker is None:
+                session_maker = self.default_session_maker
+            async with session_maker() as tx:
+                token = self._transaction_var.set(tx)
+                try:
+                    yield tx
+                finally:
                     self._transaction_var.reset(token)
-                else:
-                    tx_list.remove(tx)
+        else:
+            async with tx.begin_nested() as nested_tx:
+                yield nested_tx
 
     @asynccontextmanager
-    async def get_current_transaction(self) -> typing.ContextManager[AsyncSession]:
-        tx_list: typing.Optional[typing.List] = self._transaction_var.get(None)
-        if tx_list:
-            yield tx_list[-1]
-        else:
-            async with self._session_maker() as tx:
-                yield tx
+    async def current_transaction_or_default(self):
+        tx: typing.Optional[AsyncSession] = self._transaction_var.get(None)
+        if tx is not None:
+            yield tx
+            return
+        async with self.default_session_maker() as tx:
+            yield tx
+
+    def get_current_transaction(self) -> typing.Optional[AsyncSession]:
+        return self._transaction_var.get(None)
 
     def _proxy_sqlalchemy_query_factory(self, method: typing.Any) -> typing.Any:
         def wrapper(*args, **kwargs):
