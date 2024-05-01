@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, overload, Any, Optional, Union, ContextManager, AsyncContextManager
+from typing import TYPE_CHECKING, overload, Any, Optional, Union, AsyncContextManager
 
 from sqlalchemy import ScalarSelect, SelectBase
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, AsyncSessionTransaction

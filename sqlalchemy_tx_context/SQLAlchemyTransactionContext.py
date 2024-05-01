@@ -5,11 +5,17 @@ from contextlib import asynccontextmanager
 import sqlalchemy
 from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker, AsyncSessionTransaction
 from sqlalchemy.ext.asyncio import AsyncSession
-
+from sqlalchemy.sql import roles
 
 FIELD_PROPERTIES = frozenset([
     'query',
     'context'
+])
+
+IGNORE_PROPERTIES = frozenset([
+    'compile',
+    'alias',
+    'subquery'
 ])
 
 EXECUTE_PROPERTIES = frozenset([
@@ -78,6 +84,10 @@ class ProxyQuery:
         elif item in EXECUTE_PROPERTIES:
             return _execute_query(self.context, self.query, item)
         value = object.__getattribute__(self.query, item)
+        if item.startswith('_'):
+            return value
+        if item in IGNORE_PROPERTIES:
+            return value
         if not callable(value):
             return value
 
