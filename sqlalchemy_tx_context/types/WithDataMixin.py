@@ -1,6 +1,7 @@
+import typing
 from typing import Any, Optional, Sequence, Generic, TypeVar, Union, Tuple
 
-from sqlalchemy import util, RowMapping, ScalarResult, Row, Result
+from sqlalchemy import util, RowMapping, ScalarResult, Row
 # noinspection PyProtectedMember
 from sqlalchemy.engine.interfaces import _CoreAnyExecuteParams
 # noinspection PyProtectedMember
@@ -23,6 +24,16 @@ class WithDataMixin(Generic[T], ExecuteMixin[T]):
         _parent_execute_state: Optional[Any] = None,
         _add_event: Optional[Any] = None
     ) -> Optional[Row[Tuple[T]]]: ...
+
+    async def all(
+        self,
+        params: Optional[_CoreAnyExecuteParams] = None,
+        *,
+        execution_options: OrmExecuteOptionsParameter = util.EMPTY_DICT,
+        bind_arguments: Optional[_BindArguments] = None,
+        _parent_execute_state: Optional[Any] = None,
+        _add_event: Optional[Any] = None
+    ) -> typing.List[Row[Tuple[T]]]: ...
 
     async def scalar(
         self,
