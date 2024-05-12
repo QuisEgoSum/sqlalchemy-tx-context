@@ -3,9 +3,9 @@ import contextvars
 from contextlib import asynccontextmanager
 
 import sqlalchemy
+from sqlalchemy import dialects
 from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker, AsyncSessionTransaction
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.sql import roles
 
 FIELD_PROPERTIES = frozenset([
     'query',
@@ -97,6 +97,11 @@ class ProxyQuery:
         return wrapper
 
 
+class PostgreSQL:
+    def __init__(self, insert):
+        self.insert = insert
+
+
 class SQLAlchemyTransactionContext:
     def __init__(
         self,
@@ -122,6 +127,9 @@ class SQLAlchemyTransactionContext:
         self.union = self._proxy_sqlalchemy_query_factory(sqlalchemy.union)
         self.union_all = self._proxy_sqlalchemy_query_factory(sqlalchemy.union_all)
         self.exists = self._proxy_sqlalchemy_query_factory(sqlalchemy.exists)
+        self.postgresql = PostgreSQL(
+            self._proxy_sqlalchemy_query_factory(dialects.postgresql.insert)
+        )
 
     @asynccontextmanager
     async def transaction(

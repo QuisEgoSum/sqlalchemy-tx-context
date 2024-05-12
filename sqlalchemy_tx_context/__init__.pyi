@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, overload, Any, Optional, Union, AsyncContextMa
 from sqlalchemy import ScalarSelect, SelectBase
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, AsyncSessionTransaction
 
-from .types import Insert, Select, Update, Delete, Exists, CompoundSelect
+from .types import Insert, Select, Update, Delete, Exists, CompoundSelect, postgresql
 
 if TYPE_CHECKING:
     # noinspection PyProtectedMember
@@ -17,8 +17,14 @@ if TYPE_CHECKING:
         _T8, _T9
     )
 
+
+class PostgreSQL:
+    def insert(self, table: _DMLTableArgument) -> postgresql.Insert: ...
+
+
 class SQLAlchemyTransactionContext:
     engine: AsyncEngine
+    postgresql: PostgreSQL
 
     def __init__(self, engine: AsyncEngine): ...
 

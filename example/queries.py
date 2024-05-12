@@ -15,7 +15,7 @@ async def test():
 
     print('Delete result', delete_result)
 
-    insert_result = await db.insert(Test).values(id=1, name='test 1').execute()
+    insert_result = await db.postgresql.insert(Test).values(id=1, name='test 1').execute()
     print('Inserted count', insert_result.rowcount)
 
     select_result = await db.select(Test.__table__).where(Test.id == 1).mapped_all()
