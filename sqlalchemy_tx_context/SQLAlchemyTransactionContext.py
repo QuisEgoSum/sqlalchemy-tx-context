@@ -15,7 +15,8 @@ FIELD_PROPERTIES = frozenset([
 IGNORE_PROPERTIES = frozenset([
     'compile',
     'alias',
-    'subquery'
+    'subquery',
+    'label'
 ])
 
 EXECUTE_PROPERTIES = frozenset([
