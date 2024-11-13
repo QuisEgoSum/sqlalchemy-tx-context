@@ -8,7 +8,7 @@ def readme():
 
 setup(
     name='sqlalchemy_tx_context',
-    version='0.3.1',
+    version='0.4.0',
     author='QuisEgoSum',
     author_email='subbotin.evdokim@gmail.com',
     description='An extension for sqlalchemy',

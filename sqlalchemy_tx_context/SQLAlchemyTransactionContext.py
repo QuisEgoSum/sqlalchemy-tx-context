@@ -163,6 +163,20 @@ class SQLAlchemyTransactionContext:
     def get_current_transaction(self) -> typing.Optional[AsyncSession]:
         return self._transaction_var.get(None)
 
+    @asynccontextmanager
+    async def new_transaction(
+        self,
+        session_maker=None
+    ):
+        if session_maker is None:
+            session_maker = self.default_session_maker
+        async with session_maker() as tx:
+            token = self._transaction_var.set(tx)
+            try:
+                yield tx
+            finally:
+                self._transaction_var.reset(token)
+
     def _proxy_sqlalchemy_query_factory(self, method: typing.Any) -> typing.Any:
         def wrapper(*args, **kwargs):
             return ProxyQuery(method(*args, **kwargs), self)

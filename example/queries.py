@@ -52,6 +52,13 @@ async def test():
 
     assert await db.exists(Test.id).where(Test.id == 6).select().scalar() is False
 
+    async with db.transaction() as tx:
+        async with db.new_transaction() as tx2:
+            assert tx != tx2
+            async with db.current_transaction_or_default() as tx3:
+                assert tx2 == tx3
+        async with db.current_transaction_or_default() as tx4:
+            assert tx == tx4
 
 if __name__ == '__main__':
     asyncio.run(test())
