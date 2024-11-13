@@ -37,6 +37,11 @@ class SQLAlchemyTransactionContext:
 
     def get_current_transaction(self) -> Optional[AsyncSession]: ...
 
+    async def new_transaction(
+        self,
+        session_maker=None
+    ) -> AsyncContextManager[Union[AsyncSession, AsyncSessionTransaction]]: ...
+
     @overload
     def select(self, __ent0: _TypedColumnClauseArgument[_T0]) -> Select[_T0]: ...
 
