@@ -16,7 +16,8 @@ IGNORE_PROPERTIES = frozenset([
     'compile',
     'alias',
     'subquery',
-    'label'
+    'label',
+    'scalar_subquery'
 ])
 
 EXECUTE_PROPERTIES = frozenset([
