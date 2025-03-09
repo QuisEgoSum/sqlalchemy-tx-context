@@ -158,7 +158,7 @@ class SQLAlchemyTransactionContext:
         if tx is not None:
             yield tx
             return
-        async with self.default_session_maker() as tx:
+        async with self.transaction() as tx:
             yield tx
 
     def get_current_transaction(self) -> typing.Optional[AsyncSession]:

@@ -1,3 +1,4 @@
+import typing
 from typing import TYPE_CHECKING, overload, Any, Optional, Union, AsyncContextManager
 
 from sqlalchemy import ScalarSelect, SelectBase
@@ -26,7 +27,13 @@ class SQLAlchemyTransactionContext:
     engine: AsyncEngine
     postgresql: PostgreSQL
 
-    def __init__(self, engine: AsyncEngine): ...
+    def __init__(
+        self,
+        engine: AsyncEngine,
+        default_session_maker: typing.Callable[
+            [], typing.AsyncContextManager[AsyncSession]
+        ] = None
+    ): ...
 
     def transaction(
         self,
