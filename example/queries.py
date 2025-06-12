@@ -1,5 +1,6 @@
 import asyncio
 
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSessionTransaction, AsyncSession
 
 from example.connection import db
@@ -59,6 +60,10 @@ async def test():
                 assert tx2 == tx3
         async with db.current_transaction_or_default() as tx4:
             assert tx == tx4
+
+    stmt = select(Test.__table__).where(Test.id == 1)
+    result = await db.execute(stmt)
+    print('Execute stmt', result.first())
 
 if __name__ == '__main__':
     asyncio.run(test())

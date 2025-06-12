@@ -18,6 +18,7 @@ db = SQLAlchemyTransactionContext(engine)
 
 `SQLAlchemyTransactionContext` contains the following methods for creating queries with execution
 through a context session:
+- `execute`
 - `select`
 - `insert`
 - `update`

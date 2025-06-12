@@ -3,9 +3,13 @@ import contextvars
 from contextlib import asynccontextmanager
 
 import sqlalchemy
-from sqlalchemy import dialects
+from sqlalchemy import dialects, Executable, util, Result
 from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker, AsyncSessionTransaction
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from sqlalchemy.orm._typing import OrmExecuteOptionsParameter
+from sqlalchemy.engine.interfaces import _CoreAnyExecuteParams
+from sqlalchemy.orm.session import _BindArguments
 
 FIELD_PROPERTIES = frozenset([
     'query',
@@ -177,6 +181,20 @@ class SQLAlchemyTransactionContext:
                 yield tx
             finally:
                 self._transaction_var.reset(token)
+
+    async def execute(
+        self,
+        statement: Executable,
+        params: typing.Optional[_CoreAnyExecuteParams] = None,
+        *,
+        execution_options: OrmExecuteOptionsParameter = util.EMPTY_DICT,
+        bind_arguments: typing.Optional[_BindArguments] = None,
+        **kw: typing.Any,
+    ) -> Result[typing.Any]:
+        async with self.current_transaction_or_default() as tx:
+            return await tx.execute(
+                statement, params, execution_options=execution_options, bind_arguments=bind_arguments, **kw
+            )
 
     def _proxy_sqlalchemy_query_factory(self, method: typing.Any) -> typing.Any:
         def wrapper(*args, **kwargs):
