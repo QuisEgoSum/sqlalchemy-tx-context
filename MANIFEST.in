@@ -1,0 +1,3 @@
+include src/sqlalchemy_tx_context/py.typed
+global-exclude tests/*
+global-exclude example/*
