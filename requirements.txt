@@ -1,3 +1,0 @@
-asyncpg==0.29.0
-SQLAlchemy==2.0.29
-contextvars==2.4

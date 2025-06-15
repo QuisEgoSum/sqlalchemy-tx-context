@@ -1,8 +1,56 @@
-.idea
-.venv
-__pycache__
-/tmp
-/dist
-/build/
-*.egg-info
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.pyt
+*.pdm.toml
+*.pyre/
+
+# Virtualenv
+venv/
+.env/
+.venv/
+
+# PyCharm
+.idea/
+*.iml
 .run/
+
+# macOS / Linux system
+.DS_Store
+*.swp
+*.swo
+*~
+
+# Logs and dumps
+*.log
+*.out
+*.bak
+*.tmp
+*.orig
+*.old
+*.dump
+
+# Test/coverage artifacts
+.coverage
+coverage.xml
+htmlcov/
+.tox/
+.nox/
+pytest_cache/
+.cache/
+.mypy_cache/
+.dmypy.json
+.pytype/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+.eggs/
+*.whl
+
+# Personal/local project files
+local/
