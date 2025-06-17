@@ -33,7 +33,7 @@ async def auto_create_tables(
     metadata: MetaData,
     sqlite_engine: AsyncEngine,
     example_table: Table,  # noqa: ARG001
-):
+) -> AsyncGenerator[None, None]:
     async with sqlite_engine.begin() as conn:
         await conn.run_sync(metadata.create_all)
 
