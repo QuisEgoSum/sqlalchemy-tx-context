@@ -17,7 +17,10 @@ from sqlalchemy_tx_context.exceptions import (
 
 
 @pytest.mark.asyncio
-async def test_session(mock_engine: AsyncMock, mock_async_session_maker: MagicMock):
+async def test_session(
+    mock_engine: AsyncMock,
+    mock_async_session_maker: MagicMock,
+) -> None:
     db = SQLAlchemyTransactionContext(mock_engine)
 
     with pytest.raises(NoSessionError):
@@ -62,7 +65,7 @@ async def test_session(mock_engine: AsyncMock, mock_async_session_maker: MagicMo
 
 
 @pytest.mark.asyncio
-async def test_transaction(mock_engine: AsyncMock):
+async def test_transaction(mock_engine: AsyncMock) -> None:
     db = SQLAlchemyTransactionContext(mock_engine)
 
     async with db.transaction() as session:
@@ -97,18 +100,18 @@ async def test_transaction(mock_engine: AsyncMock):
 
 
 @pytest.mark.asyncio
-async def test_session_gather(mock_engine: AsyncMock):
+async def test_session_gather(mock_engine: AsyncMock) -> None:
     db = SQLAlchemyTransactionContext(mock_engine)
 
     async with db.session() as session:
 
-        async def with_new_session():
+        async def with_new_session() -> None:
             async with db.new_session() as session2:
                 assert isinstance(session2, AsyncSession)
                 assert db.get_session() is session2
                 assert session is not session2
 
-        async def without_new_session():
+        async def without_new_session() -> None:
             assert db.get_session() is session
 
         await asyncio.gather(without_new_session(), with_new_session())
@@ -122,7 +125,7 @@ async def test_execute(
     example_table: Table,
     mock_async_session: AsyncMock,
     mock_async_session_maker: MagicMock,
-):
+) -> None:
     db = SQLAlchemyTransactionContext(
         mock_engine,
         default_session_maker=mock_async_session_maker,
@@ -149,14 +152,14 @@ async def test_execute(
             {"param": "value"},
             execution_options={"option": "value"},
             bind_arguments={"bind_arg": "value"},
-            kv_value="value",
+            _parent_execute_state="value",
         )
         mock_async_session.execute.assert_called_once_with(
             select_stmt,
             {"param": "value"},
             execution_options={"option": "value"},
             bind_arguments={"bind_arg": "value"},
-            kv_value="value",
+            _parent_execute_state="value",
         )
         mock_async_session.execute.reset_mock()
 
@@ -167,7 +170,7 @@ async def test_execute_with_auto_session(
     example_table: Table,
     mock_async_session: AsyncMock,
     mock_async_session_maker: MagicMock,
-):
+) -> None:
     db = SQLAlchemyTransactionContext(
         mock_engine,
         default_session_maker=mock_async_session_maker,
@@ -205,7 +208,7 @@ async def test_execute_with_auto_session(
             {"param": "value"},
             execution_options={"option": "value"},
             bind_arguments={"bind_arg": "value"},
-            kv_value="value",
+            _parent_execute_state="value",
             force_transaction=True,
         )
 
@@ -214,7 +217,7 @@ async def test_execute_with_auto_session(
             {"param": "value"},
             execution_options={"option": "value"},
             bind_arguments={"bind_arg": "value"},
-            kv_value="value",
+            _parent_execute_state="value",
         )
 
         mock_session.assert_called_once()
