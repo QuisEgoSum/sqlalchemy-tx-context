@@ -1,9 +1,16 @@
 from collections.abc import AsyncIterator, Callable
 from contextlib import AbstractAsyncContextManager, asynccontextmanager
 from contextvars import ContextVar
-from typing import Any, Optional
+from typing import Any, Optional, TypeVar, cast
 
-from sqlalchemy import CompoundSelect, Executable, Select, util
+from sqlalchemy import (
+    CompoundSelect,
+    CursorResult,
+    Executable,
+    Select,
+    UpdateBase,
+    util,
+)
 from sqlalchemy.engine import Result
 from sqlalchemy.engine.interfaces import (
     _CoreAnyExecuteParams,  # type: ignore[reportPrivateUsage]
@@ -12,7 +19,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm._typing import (
     OrmExecuteOptionsParameter,  # type: ignore[reportPrivateUsage]
 )
-from sqlalchemy.orm.session import _BindArguments  # type: ignore[reportPrivateUsage]
+from sqlalchemy.sql.selectable import TypedReturnsRows
 from typing_extensions import Literal, overload
 
 from sqlalchemy_tx_context.exceptions import (
@@ -20,6 +27,8 @@ from sqlalchemy_tx_context.exceptions import (
     SessionAlreadyActiveError,
     TransactionAlreadyActiveError,
 )
+
+_T = TypeVar("_T", covariant=True, bound=Any)
 
 
 class SQLAlchemyTransactionContext:
@@ -148,6 +157,33 @@ class SQLAlchemyTransactionContext:
                 async with session.begin():
                     yield session
 
+    @overload
+    async def execute(
+        self,
+        statement: TypedReturnsRows[_T],
+        params: Optional[_CoreAnyExecuteParams] = None,
+        *,
+        force_transaction: Optional[bool] = None,
+        execution_options: OrmExecuteOptionsParameter = util.EMPTY_DICT,
+        bind_arguments: Optional[dict[str, Any]] = None,
+        _parent_execute_state: Optional[Any] = None,
+        _add_event: Optional[Any] = None,
+    ) -> Result[_T]: ...
+
+    @overload
+    async def execute(
+        self,
+        statement: UpdateBase,
+        params: Optional[_CoreAnyExecuteParams] = None,
+        *,
+        force_transaction: Optional[bool] = None,
+        execution_options: OrmExecuteOptionsParameter = util.EMPTY_DICT,
+        bind_arguments: Optional[dict[str, Any]] = None,
+        _parent_execute_state: Optional[Any] = None,
+        _add_event: Optional[Any] = None,
+    ) -> CursorResult[Any]: ...
+
+    @overload
     async def execute(
         self,
         statement: Executable,
@@ -155,7 +191,19 @@ class SQLAlchemyTransactionContext:
         *,
         force_transaction: Optional[bool] = None,
         execution_options: OrmExecuteOptionsParameter = util.EMPTY_DICT,
-        bind_arguments: Optional[_BindArguments] = None,
+        bind_arguments: Optional[dict[str, Any]] = None,
+        _parent_execute_state: Optional[Any] = None,
+        _add_event: Optional[Any] = None,
+    ) -> Result[Any]: ...
+
+    async def execute(
+        self,
+        statement: Executable,
+        params: Optional[_CoreAnyExecuteParams] = None,
+        *,
+        force_transaction: Optional[bool] = None,
+        execution_options: OrmExecuteOptionsParameter = util.EMPTY_DICT,
+        bind_arguments: Optional[dict[str, Any]] = None,
         **kw: Any,
     ) -> Result[Any]:
         """
@@ -182,7 +230,10 @@ class SQLAlchemyTransactionContext:
         )
         if session is None:
             if self._need_force_transaction_on_context_execute(force_transaction):
-                session_factory = self.transaction
+                session_factory = cast(
+                    Callable[..., AbstractAsyncContextManager[AsyncSession]],
+                    self.transaction,
+                )
             else:
                 session_factory = self._get_context_for_statement(statement)
             async with session_factory() as session:
@@ -315,10 +366,15 @@ class SQLAlchemyTransactionContext:
         """
 
         if self._is_readonly_statement(statement):
-            session_factory = self.session
+            return cast(
+                Callable[..., AbstractAsyncContextManager[AsyncSession]],
+                self.session,
+            )
         else:
-            session_factory = self.transaction
-        return session_factory
+            return cast(
+                Callable[..., AbstractAsyncContextManager[AsyncSession]],
+                self.transaction,
+            )
 
     def _resolve_session_maker(
         self,
