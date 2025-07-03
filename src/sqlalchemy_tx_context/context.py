@@ -15,7 +15,7 @@ from sqlalchemy.engine import Result
 from sqlalchemy.engine.interfaces import (
     _CoreAnyExecuteParams,  # type: ignore[reportPrivateUsage]
 )
-from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, AsyncSessionTransaction, async_sessionmaker
 from sqlalchemy.orm._typing import (
     OrmExecuteOptionsParameter,  # type: ignore[reportPrivateUsage]
 )
@@ -128,7 +128,7 @@ class SQLAlchemyTransactionContext:
         session_maker: Optional[async_sessionmaker[AsyncSession]] = None,
         reuse_if_exists: bool = True,
         allow_nested_transactions: bool = True,
-    ) -> AsyncIterator[AsyncSession]:
+    ) -> AsyncIterator[AsyncSessionTransaction]:
         """
         Enter a transaction context. Creates a new session if needed.
 
