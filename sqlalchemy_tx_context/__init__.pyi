@@ -1,8 +1,24 @@
 import typing
 from typing import TYPE_CHECKING, overload, Any, Optional, Union, AsyncContextManager
 
+from sqlalchemy import (
+    CompoundSelect,
+    CursorResult,
+    Executable,
+    Select,
+    UpdateBase,
+    util,
+)
 from sqlalchemy import ScalarSelect, SelectBase
+from sqlalchemy.engine import Result
+from sqlalchemy.engine.interfaces import (
+    _CoreAnyExecuteParams,  # type: ignore[reportPrivateUsage]
+)
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, AsyncSessionTransaction
+from sqlalchemy.orm._typing import (
+    OrmExecuteOptionsParameter,  # type: ignore[reportPrivateUsage]
+)
+from sqlalchemy.sql.selectable import TypedReturnsRows
 
 from .types import Insert, Select, Update, Delete, Exists, CompoundSelect, postgresql
 
@@ -17,6 +33,8 @@ if TYPE_CHECKING:
         _T4, _T5, _T6, _T7,
         _T8, _T9
     )
+
+_T = typing.TypeVar("_T", covariant=True, bound=Any)
 
 
 class PostgreSQL:
@@ -187,3 +205,49 @@ class SQLAlchemyTransactionContext:
     def exists(
         self, __argument: Optional[Union[_ColumnsClauseArgument[Any], SelectBase, ScalarSelect[Any]]] = None
     ) -> Exists: ...
+
+    @overload
+    async def execute(
+        self,
+        statement: TypedReturnsRows[_T],
+        params: Optional[_CoreAnyExecuteParams] = None,
+        *,
+        execution_options: OrmExecuteOptionsParameter = util.EMPTY_DICT,
+        bind_arguments: Optional[dict[str, Any]] = None,
+        _parent_execute_state: Optional[Any] = None,
+        _add_event: Optional[Any] = None,
+    ) -> Result[_T]: ...
+
+    @overload
+    async def execute(
+        self,
+        statement: UpdateBase,
+        params: Optional[_CoreAnyExecuteParams] = None,
+        *,
+        execution_options: OrmExecuteOptionsParameter = util.EMPTY_DICT,
+        bind_arguments: Optional[dict[str, Any]] = None,
+        _parent_execute_state: Optional[Any] = None,
+        _add_event: Optional[Any] = None,
+    ) -> CursorResult[Any]: ...
+
+    @overload
+    async def execute(
+        self,
+        statement: Executable,
+        params: Optional[_CoreAnyExecuteParams] = None,
+        *,
+        execution_options: OrmExecuteOptionsParameter = util.EMPTY_DICT,
+        bind_arguments: Optional[dict[str, Any]] = None,
+        _parent_execute_state: Optional[Any] = None,
+        _add_event: Optional[Any] = None,
+    ) -> Result[Any]: ...
+
+    async def execute(
+        self,
+        statement: Executable,
+        params: Optional[_CoreAnyExecuteParams] = None,
+        *,
+        execution_options: OrmExecuteOptionsParameter = util.EMPTY_DICT,
+        bind_arguments: Optional[dict[str, Any]] = None,
+        **kw: Any,
+    ) -> Result[Any]: ...
